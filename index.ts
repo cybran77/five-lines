@@ -1,4 +1,4 @@
-// TODO: 5.2 Unifying Simple Conditions
+
 const TILE_SIZE = 30;
 const FPS = 30;
 const SLEEP = 1000 / FPS;
@@ -26,7 +26,7 @@ interface Tile {
   isStony(): boolean;
   isBoxy(): boolean;
   drop(): void;
-  rest(): void
+  rest(): void;
 }
 
 class Air implements Tile {
@@ -106,31 +106,22 @@ class Player implements Tile {
 interface FallingState {
   isFalling(): boolean;
   moveHorizontal(tile: Tile, dx: number): void;
-  drop(): void;
-  rest(): void;
 }
-
-class Falling implements FallingState {
+class Falling {
   isFalling() { return true; }
   moveHorizontal(tile: Tile, dx: number) {
   }
-  drop(): void { }
-  rest(): void { }
 }
-
-class Resting implements FallingState {
+class Resting {
   isFalling() { return false; }
-  moveHorizontal(tile: Tile, dx: number): void {
+  moveHorizontal(tile: Tile, dx: number) {
     if (map[playery][playerx + dx + dx].isAir()
       && !map[playery + 1][playerx + dx].isAir()) {
       map[playery][playerx + dx + dx] = tile;
       moveToTile(playerx + dx, playery);
     }
   }
-  drop(): void { }
-  rest(): void { }
 }
-
 class Stone implements Tile {
   constructor(private falling: FallingState) { }
   isAir() { return false; }
@@ -148,15 +139,15 @@ class Stone implements Tile {
   moveVertical(dy: number) { }
   isStony() { return true; }
   isBoxy() { return false; }
-  drop() { }
-  rest() { }
+  drop() { this.falling = true; }
+  rest() { this.falling = false; }
 }
 
 class Box implements Tile {
   constructor(private falling: FallingState) { }
   isAir() { return false; }
-  isFallingStone() { return this.falling.isFalling(); }
-  isFallingBox() { return false; }
+  isFallingStone() { return false; }
+  isFallingBox() { return this.falling.isFalling(); }
   isLock1() { return false; }
   isLock2() { return false; }
   draw(g: CanvasRenderingContext2D, x: number, y: number) {
@@ -169,8 +160,8 @@ class Box implements Tile {
   moveVertical(dy: number) { }
   isStony() { return false; }
   isBoxy() { return true; }
-  drop() { }
-  rest() { }
+  drop() { this.falling = true; }
+  rest() { this.falling = false; }
 }
 
 class Key1 implements Tile {
@@ -307,7 +298,7 @@ function transformTile(tile: RawTile) {
     case RawTile.STONE: return new Stone(new Resting());
     case RawTile.FALLING_STONE: return new Stone(new Falling());
     case RawTile.BOX: return new Box(new Resting());
-    case RawTile.FALLING_BOX: return new Box(new Falling);
+    case RawTile.FALLING_BOX: return new Box(new Falling());
     case RawTile.FLUX: return new Flux();
     case RawTile.KEY1: return new Key1();
     case RawTile.LOCK1: return new Lock1();
@@ -381,7 +372,7 @@ function updateTile(x: number, y: number) {
     map[y][x] = new Air();
   } else if (map[y][x].isBoxy()
     && map[y + 1][x].isAir()) {
-    map[y + 1][x] = new Box(new Falling);
+    map[y + 1][x] = new Box(new Falling());
     map[y][x] = new Air();
   } else if (map[y][x].isFallingStone()) {
     map[y][x] = new Stone(new Resting());
