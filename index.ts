@@ -1,4 +1,4 @@
-
+// TODO: 5.2 Unifying Simple Conditions
 const TILE_SIZE = 30;
 const FPS = 30;
 const SLEEP = 1000 / FPS;
@@ -25,6 +25,8 @@ interface Tile {
   moveVertical(dy: number): void;
   isStony(): boolean;
   isBoxy(): boolean;
+  drop(): void;
+  rest(): void
 }
 
 class Air implements Tile {
@@ -42,6 +44,8 @@ class Air implements Tile {
   }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Flux implements Tile {
@@ -62,6 +66,8 @@ class Flux implements Tile {
   }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Unbreakable implements Tile {
@@ -78,6 +84,8 @@ class Unbreakable implements Tile {
   moveVertical(dy: number) { }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Player implements Tile {
@@ -91,17 +99,23 @@ class Player implements Tile {
   moveVertical(dy: number) { }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 interface FallingState {
   isFalling(): boolean;
   moveHorizontal(tile: Tile, dx: number): void;
+  drop(): void;
+  rest(): void;
 }
 
 class Falling implements FallingState {
   isFalling() { return true; }
   moveHorizontal(tile: Tile, dx: number) {
   }
+  drop(): void { }
+  rest(): void { }
 }
 
 class Resting implements FallingState {
@@ -113,6 +127,8 @@ class Resting implements FallingState {
       moveToTile(playerx + dx, playery);
     }
   }
+  drop(): void { }
+  rest(): void { }
 }
 
 class Stone implements Tile {
@@ -132,6 +148,8 @@ class Stone implements Tile {
   moveVertical(dy: number) { }
   isStony() { return true; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Box implements Tile {
@@ -151,33 +169,8 @@ class Box implements Tile {
   moveVertical(dy: number) { }
   isStony() { return false; }
   isBoxy() { return true; }
-}
-
-class FallingBox implements Tile {
-  constructor(private falling: FallingState) { }
-  isAir() { return false; }
-  isFallingStone() { return false; }
-  isFallingBox() { return true; }
-  isLock1() { return false; }
-  isLock2() { return false; }
-  draw(g: CanvasRenderingContext2D, x: number, y: number) {
-    g.fillStyle = "#8b4513";
-    g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-  }
-  moveHorizontal(dx: number) {
-    if (this.isFallingBox() === false) {
-      if (map[playery][playerx + dx + dx].isAir()
-        && !map[playery + 1][playerx + dx].isAir()) {
-        map[playery][playerx + dx + dx] = this;
-        moveToTile(playerx + dx, playery);
-      }
-    } else if (this.isFallingBox() === true) {
-
-    }
-  }
-  moveVertical(dy: number) { }
-  isStony() { return false; }
-  isBoxy() { return true; }
+  drop() { }
+  rest() { }
 }
 
 class Key1 implements Tile {
@@ -200,6 +193,8 @@ class Key1 implements Tile {
   }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Lock1 implements Tile {
@@ -216,6 +211,8 @@ class Lock1 implements Tile {
   moveVertical(dy: number) { }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Key2 implements Tile {
@@ -238,6 +235,8 @@ class Key2 implements Tile {
   }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 class Lock2 implements Tile {
@@ -254,6 +253,8 @@ class Lock2 implements Tile {
   moveVertical(dy: number) { }
   isStony() { return false; }
   isBoxy() { return false; }
+  drop() { }
+  rest() { }
 }
 
 interface Input {
